@@ -1,0 +1,15 @@
+.container{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2px;
+}
+
+.selection{
+    height: 100vh;
+    outline: none !important;
+}   
+
+a, a:hover{
+    text-decoration: none;
+}
+
