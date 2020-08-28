@@ -32,7 +32,16 @@ import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CategoryIcon from '@material-ui/icons/Category';
-import {fetchItems, fetchCategories, addItem, addCategory, removeCategory} from '../../../Api/items';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined'
+import {fetchItems, 
+  fetchCategories, 
+  addItem, 
+  addCategory, 
+  removeCategory, 
+  removeItem,
+  updateItem,
+  deleteImage} from '../../../Api/items';
 import {fetchSupplier} from './../../../Api/suppliers';
 import {DropzoneArea} from 'material-ui-dropzone';
 
@@ -62,10 +71,7 @@ function Items({setTitle}) {
       addCategory:false
     });
 
-    const [search, setSearch] = useState({ 
-      toSearch :'',
-      searchType: 'Name'
-    });
+    const [search, setSearch] = useState('');
 
     const [form, setForm] = useState ({
       Name:'',
@@ -86,19 +92,29 @@ function Items({setTitle}) {
       Supplier:false
     });
 
+    //use Ref
+    const topRef = React.useRef();
 
     //Use effects
     useEffect(()=>{
+      let isCancelled = false;
       setTitle('Items');
       const fetchApi = async () => {
-        let resitems = await fetchItems();
-        let rescategories = await fetchCategories();
-        let ressuppliers = await fetchSupplier();
-        setItems(resitems);
-        setCategories(rescategories);
-        setSuppliers(ressuppliers);
+          let resitems = await fetchItems();
+          let rescategories = await fetchCategories();
+          let ressuppliers = await fetchSupplier();
+          if(!isCancelled)
+          {setItems(resitems.data);
+          setCategories(rescategories);
+          setSuppliers(ressuppliers);}
       }
-      fetchApi();
+      try{
+        fetchApi();
+      }catch(e){
+        console.log(e)
+      }
+
+      return ()=>isCancelled=true;
     },[]);
     
 
@@ -109,8 +125,15 @@ function Items({setTitle}) {
     
     const createItem = async (e) => {
       e.preventDefault();
-      const {Name, Price, SellPrice, Category, Qty, Supplier, Images} = form  
-      const res = await addItem(Name, 
+      const {id, Name, Price, SellPrice, Category, Qty, Supplier, Images} = form;  
+      const res = isEdit ? await updateItem(id, 
+        Name, 
+        Price, 
+        SellPrice, 
+        Category, 
+        Qty, 
+        Images
+        ) : await addItem(Name, 
         Price, 
         SellPrice, 
         Category, 
@@ -119,6 +142,8 @@ function Items({setTitle}) {
         Images);
         const {status, data:{errors}} = res
       if(status==422){
+        console.log(form)
+        topRef.current.scrollIntoView();
         let errorsContainer = {
           Name:false,
           Category:false,
@@ -132,19 +157,28 @@ function Items({setTitle}) {
         }
         setError(errorsContainer)
       }
-      else if(status==201){
+      else if(status==201 || status==200){
+        setError({
+          Name:false,
+          Category:false,
+          Price:false,
+          SellPrice:false,
+          Qty:false,
+          Supplier:false
+        });
         setManageItemModal(false);
         setItems(
-          isEdit ? suppliers.map(supplier=>{
-            if(supplier.id == res.data.id)
-            return res.data
-            return supplier
+          isEdit ? items.map(item=>{
+            if(item.id == res.data.id)
+            return res.data;
+            return item;
           })
-          :[res.data, ...items]
+          :[res.data[0], ...items]
         );
+        console.log(res.data)
         isEdit ? setAlert(showAlert('Item Successfully Edited !', 'success'))
         :setAlert(showAlert('Item Successfully Added !', 'success'));
-        setAlertVisible(true);
+        setAlertVisible(true);  
         setTimeout(()=>setAlertVisible(false), 10000);
       }
     }
@@ -172,6 +206,16 @@ function Items({setTitle}) {
       setCategories(categories.filter(category=>category.id!==id))
     }
 
+    const deleteItem = async(id)=>{
+      const res = await removeItem(id);
+      if(res.status==200)
+      setItems(items.filter(item=>item.id!==id))
+    }
+
+    const destroyImage = async (image)=>{
+      return isEdit && await deleteImage(image.name);
+    }
+
     //Dialogs
     const addDialog = (
         <Dialog
@@ -186,6 +230,16 @@ function Items({setTitle}) {
               Qty:false,
               Supplier:false
             });
+            setForm ({
+              Name:'',
+              Category:' ',
+              Price:'',
+              SellPrice:'',
+              Qty:'1',
+              Supplier:' ',
+              Images:[]
+            });
+            setIsEdit(false);
           }}
           scroll="paper"
           aria-labelledby="scroll-dialog-title"
@@ -198,6 +252,7 @@ function Items({setTitle}) {
             <Container>
                 <FormControl margin="normal" fullWidth>
                   <TextField required
+                  ref={topRef}
                   name="Name" 
                   id="standard-required" 
                   defaultValue={isEdit ? form.Name : ''}
@@ -222,7 +277,7 @@ function Items({setTitle}) {
                     <MenuItem value={' '}>
                           {'--Select Category--'}
                     </MenuItem>
-                    {categories.map(category=>(
+                    {categories.length >0  && categories.map(category=>(
                       <MenuItem key={category.id} value={category.id}>
                           {category.Name}
                       </MenuItem>
@@ -251,7 +306,8 @@ function Items({setTitle}) {
                   startAdornment={<InputAdornment position="start">	&#8369;</InputAdornment>}
                 />
                 </FormControl >
-                <FormControl margin="normal" fullWidth>
+                {isEdit ? (<React.Fragment></React.Fragment>):(
+                  <FormControl margin="normal" fullWidth>
                   <TextField
                   select
                   label="Supplier"
@@ -265,13 +321,16 @@ function Items({setTitle}) {
                       <MenuItem value={' '}>
                             {'--Select Supplier--'}
                       </MenuItem>
-                      {suppliers.map(supplier=>(
-                        <MenuItem key={supplier.id} value={supplier.id}>
-                            {supplier.Name}
-                        </MenuItem>
-                      ))}
+                      {
+                        suppliers.map(supplier=>(
+                          <MenuItem key={supplier.id} value={supplier.id}>
+                              {supplier.Name}
+                          </MenuItem>
+                        ))
+                      }
                   </TextField>
                 </FormControl>
+                )}
                 <FormControl margin="normal" fullWidth>
                   <TextField
                     required
@@ -282,6 +341,7 @@ function Items({setTitle}) {
                     error={error.Qty && true}
                     helperText={error.Qty}
                     onChange={handleChange}
+                    
                     variant="filled"
                     fullWidth
                   />
@@ -292,10 +352,15 @@ function Items({setTitle}) {
                   </Typography>
                   <DropzoneArea
                     acceptedFiles={['image/*']}
+                    initialFiles={isEdit && form.Images.length > 0 ? (form.Images.map(image=>{
+                      return 'http://posinventory.test/storage/ItemImages/' + image.image;
+                    })): []}
                     dropzoneText={"Drag and drop an image here or click"}
-                    onChange={(files) => {console.log('Files:', files); setForm({...form, Images:files})}}
+                    onChange={(files) => {setForm({...form, Images:files})}}
                     filesLimit={5}
+                    onDelete={(e)=>destroyImage(e)}
                     showAlerts={['error', 'info']}
+                    maxFileSize={1999999}
                     previewGridClasses={{container: {spacing:3}}}
                   />
                 </FormControl>
@@ -416,7 +481,10 @@ function Items({setTitle}) {
       </Dialog>
     )
 
-    return (
+
+    //render
+    try{
+      return  (
         <div className={classes.container}>
             <CssBaseline />
             <div className="container-fluid">
@@ -426,37 +494,17 @@ function Items({setTitle}) {
                             <Grid container spacing={2}>
                                 <Grid item xs={8}>
                                     <TextField id="search" name="search" 
-                                    label="Search" 
-                                    onChange={(e)=>setSearch({...search,toSearch:e.target.value})} 
+                                    label="Search Item" 
+                                    onChange={(e)=>setSearch(e.target.value)}
                                     fullWidth
                                     />
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <TextField
-                                    select
-                                    label="Type"
-                                    name="searchType"
-                                    value={search.searchType}
-                                    onChange={(e)=>setSearch({...search,searchType:e.target.value})}
-                                    fullWidth
-                                    >
-                                        <MenuItem value="Name">
-                                            Name
-                                        </MenuItem>
-                                        <MenuItem value="Category">
-                                            Category
-                                        </MenuItem>
-                                        <MenuItem value="Supplier Name">
-                                            Supplier Name
-                                        </MenuItem>
-                                    </TextField>
                                 </Grid>
                             </Grid>
                         </form>
                     </Grid>
                     <Grid item xs={7}>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid item xs={3}>
                         </Grid>
                         <Grid item xs={5}>
                           <Button
@@ -470,7 +518,7 @@ function Items({setTitle}) {
                           Manage Category
                         </Button>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <Button
                           variant="contained"
                           onClick={()=>setManageItemModal(true)}
@@ -495,29 +543,50 @@ function Items({setTitle}) {
                     <TableHead>
                       <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell align="right">Category</TableCell>
-                        <TableCell align="right">Price</TableCell>
-                        <TableCell align="right">Selling Price</TableCell>
+                        <TableCell align="center">Category</TableCell>
+                        <TableCell align="center">Price</TableCell>
+                        <TableCell align="center">Sell Price</TableCell>
+                        <TableCell align="center">Qty</TableCell>
                         <TableCell align="center">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {items.map((item) => (
+                      {items.length > 0 && items.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell component="th" scope="row">
                             {item.Name}
                           </TableCell>
-                          <TableCell align="right">{'---'}</TableCell>
+                          <TableCell align="right">{item.category !== null ? item.category.Name : '---'}</TableCell>
                           <TableCell align="right">{item.Price}</TableCell>
                           <TableCell align="right">{item.SellPrice}</TableCell>
+                          <TableCell align="right">{item.Qty}</TableCell>
                           <TableCell align="center">
                             <Tooltip title="Delete Item" aria-label="Delete Item">
-                              <IconButton className="text-danger" aria-label="delete">
+                              <IconButton className="text-primary" aria-label="delete">
+                                <VisibilityIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="View Item" aria-label="Delete Item">
+                              <IconButton onClick={e=>deleteItem(item.id)} className="text-danger" aria-label="delete">
                                 <DeleteIcon />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Edit Item" aria-label="Edit Item">
-                              <IconButton className="text-success"  aria-label="Edit">
+                              <IconButton 
+                              onClick={()=>{
+                                setManageItemModal(true);
+                                setIsEdit(true);
+                                setForm({
+                                  id:item.id,
+                                  Name:item.Name,
+                                  Category:item.category==null ? ' ' : item.category.id,
+                                  Price:item.Price,
+                                  SellPrice:item.SellPrice,
+                                  Qty:item.Qty,
+                                  Images:item.images
+                                });
+                              }} 
+                              className="text-success"  aria-label="Edit">
                                 <EditIcon />
                               </IconButton>
                             </Tooltip>
@@ -533,6 +602,12 @@ function Items({setTitle}) {
           {addDialog}
         </div>
     )
+    }catch(e){
+      console.log(e)
+      return (
+        <h1>Something Went Wrong</h1>
+      )
+    }
 }
 
 export default Items

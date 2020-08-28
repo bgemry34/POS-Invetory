@@ -60,18 +60,23 @@ export const MainListItems = ({setTitle}) => (
       <ListItemText primary="Supplier" />
     </ListItem>
 
-    <ListItem button>
+    <ListItem button
+    component={NavLink}
+    to="/Inventory/Stocks"
+    activeStyle={{
+      backgroundColor:'#ecf0f1'
+    }}>
       <ListItemIcon>
-        <PeopleIcon />
+        <i className="fab fa-dropbox fa-2x"></i>
       </ListItemIcon>
-      <ListItemText primary="Customers" />
+      <ListItemText primary="Stocks" />
     </ListItem>
 
     <ListItem button>
       <ListItemIcon>
         <BarChartIcon />
       </ListItemIcon>
-      <ListItemText primary="Reports" />
+      <ListItemText primary="Stocks" />
     </ListItem>
 
     <ListItem button>

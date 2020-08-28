@@ -33,3 +33,10 @@ export const updateSupplier =  (SupplierId, Name, Address, PhoneNumber) => {
     .catch(error=>error.response);
     return data;
 }
+
+export const deleteImage =  (Image) => {
+    const data =  axios.delete(`${url}/items/deleteImage`, {data:{Image}})
+    .then(res=>res)
+    .catch(error=>error.response);
+    return data;
+}

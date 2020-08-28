@@ -24,7 +24,7 @@ import {
   Link,
 } from '@material-ui/core'
 
-function Copyright(){
+function Copyright(x){
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
@@ -39,14 +39,6 @@ function Copyright(){
 
 export default function Dashboard({setTitle}) {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-  document.title = 'Inventory | Dashboard';
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   React.useEffect(()=>setTitle('Dashboard'))
   return (

@@ -41,13 +41,15 @@ function Suppliers({setTitle}) {
 
     //UseEffect
     useEffect(()=>{
+      let isCancelled = false;
       setTitle('Suppliers')
       const fetchApi = async () => {
         const res = await fetchSupplier()
-        setSuppliers(...suppliers, res)
+        if(!isCancelled)
+        setSuppliers(res)
       }
       fetchApi();
-      console.log('rerendering')
+      return ()=>isCancelled=true;
     }, [])
 
     // States
@@ -91,7 +93,8 @@ function Suppliers({setTitle}) {
       e.preventDefault();
       const {Name, Address, PhoneNumber, id} = form
       setAddBtn(true)
-      const res = isEdit ? await updateSupplier(id, Name, Address, PhoneNumber) : await createSupplier(Name, Address, PhoneNumber);
+      const res = isEdit ? await updateSupplier(id, Name, Address, PhoneNumber) 
+      : await createSupplier(Name, Address, PhoneNumber);
       const {status, data:{errors}} = res
       setAddBtn(false)
       setError({

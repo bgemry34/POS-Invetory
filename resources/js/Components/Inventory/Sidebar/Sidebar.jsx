@@ -8,6 +8,7 @@ import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
 import Dashboard from './../Dashboard/Dashboard'
 import Items from './../Items/Items'
 import Suppliers from './../Suppliers/Suppliers'
+import Stocks from './../Stocks/Stocks'
 
 
 import {
@@ -26,12 +27,7 @@ const Sidebar = () => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [title, setTitle] = React.useState('');
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+
   document.title = `Inventory | ${title}`;
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -45,7 +41,7 @@ const Sidebar = () => {
             edge="start"
             color="inherit"
             aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            onClick={()=>setOpen(true)}
             className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
@@ -73,7 +69,7 @@ const Sidebar = () => {
           variant="h5" gutterBottom>
             Inventory
           </Typography>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={()=>setOpen(false)}>
             <MenuIcon />
           </IconButton>
         </div>
@@ -96,6 +92,9 @@ const Sidebar = () => {
             </Route>
             <Route path="/Inventory/Suppliers" >
               <Suppliers setTitle={setTitle} />
+            </Route>
+            <Route path="/Inventory/Stocks" >
+              <Stocks setTitle={setTitle} />
             </Route>
           </Switch>
         

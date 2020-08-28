@@ -41,11 +41,13 @@ Route::group([
     'prefix' => 'items'
 ], function ($router) {
     Route::GET('/', 'Api\Inventory\ItemsController@index');
+    Route::GET('/searchItem','Api\Inventory\ItemsController@search');
     Route::POST('create', 'Api\Inventory\ItemsController@store');
-    Route::PUT('update', 'Api\Inventory\ItemsController@store');
+    Route::PUT('update', 'Api\Inventory\ItemsController@update');
     Route::DELETE('delete', 'Api\Inventory\ItemsController@destroy');
-    
-    Route::POST('itemtest', 'Api\Inventory\ItemsController@testImage');
+    Route::DELETE('deleteImage', 'Api\Inventory\ItemsController@itemImageDestroy');
+
+    Route::POST('itemtest', 'Api\Inventory\ItemsController@itemtest');
 });
 
 Route::group([
@@ -80,4 +82,12 @@ Route::group(['prefix' => 'admin','middleware' => ['assign.guard:admins','jwt.au
 Route::group(['prefix' => 'user','middleware' => ['assign.guard:admins','jwt.auth']],function ()
 {
 	Route::get('/demo','UserController@demo');	
+});
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'stock'
+], function ($router) {
+    Route::GET('/', 'Api\Inventory\StocksController@index');
+    Route::POST('create', 'Api\Inventory\StocksController@store');
 });

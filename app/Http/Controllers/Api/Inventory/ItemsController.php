@@ -8,6 +8,7 @@ use App\Item;
 use App\SupplierStock;
 use App\ItemImage;
 use DB;
+use Illuminate\Support\Facades\Storage;
 
 class ItemsController extends Controller
 {
@@ -19,7 +20,7 @@ class ItemsController extends Controller
     public function index()
     {
         // return Item::with('category:id,name','images:id,image')->orderBy('id', 'desc')->get();
-        return Item::with('category:id,name','images:id,item_id,image')->orderBy('id', 'desc')->get();
+        return Item::with('category:id,Name','images:id,item_id,image')->orderBy('id', 'desc')->paginate(10);
     }
 
     /**
@@ -41,12 +42,12 @@ class ItemsController extends Controller
     public function store(Request $request)
     {
         //
-        $item = $request->isMethod('put') ? Item::findOrFail($request->ItemId) : new Item;
+        $item =  new Item;
 
         $this->validate($request, [
-            'Images' => 'nullable|max:3',
+            'Images' => 'nullable|max:5',
             'Images.*' => 'mimes:jpeg, png, bmp, svg|max:1999',
-            'Name' => 'required|unique:items,name'.($request->isMethod('put') ? ",$request->ItemId":''),
+            'Name' => 'required|unique:items',
             'Price' => 'required|numeric|min:1',
             'SellPrice' => 'required|numeric|min:1',
             'Category' => 'required|numeric',
@@ -63,6 +64,7 @@ class ItemsController extends Controller
         $item->CategoryId = $request->input('Category');
         $item->Qty = $request->input('Qty');
         DB::beginTransaction();
+        $savedFiles = [];
         try {
         if($item->save()){
             if(!$request->isMethod('put'))
@@ -80,16 +82,20 @@ class ItemsController extends Controller
                     $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                     $extension = $image->getClientOriginalExtension();
                     $name = rand(10000,9999999).'_'.date('YmdHis').'_'.rand(10000,9999999).'.'.$image->extension();
-                    $image->move(public_path().'/ItemImages/', $name);
+                    $image->storeAs('public/ItemImages', $name);
                     ItemImage::addImage($item->id, $name);
+                    array_push($savedFiles, $name);
                 }
              }
             DB::commit();
-            return $item;
+
+             return response()->json([$item, $item->category, $item->images], 201);
         }
 
         }catch (Exception $e) {
             DB::rollBack();
+            forEach($savedFiles as $savedFile)
+            Storage::delete('public/ItemImages', $savedFile);
             return $e;
         } 
     }
@@ -102,15 +108,74 @@ class ItemsController extends Controller
      */
     public function show($id)
     {
-       
         
     }
 
-
-    public function testImage(Request $request){
-
+    public function itemtest(Request $request){
+        return Storage::disk('public')->exists('/ItemImages/195755_20200823141457_4757583.jpeg');
     }
 
+
+    public function update(Request $request)
+    {
+        $item =  Item::find($request->ItemId);
+        $this->validate($request, [
+            'Images' => 'nullable|max:5',
+            'Images.*' => 'mimes:jpeg, png, bmp, svg|max:1999',
+            'Name' => 'required|unique:items,Name,'.$request->ItemId,
+            'Price' => 'required|numeric|min:1',
+            'SellPrice' => 'required|numeric|min:1',
+            'Category' => 'required|numeric',
+            'Qty' => 'required|integer|min:1',
+        ]);
+        
+
+        $item->id = $request->input('ItemId') ;
+        $item->Name =  $request->input('Name');
+        $item->Price = $request->input('Price');
+        $item->SellPrice = $request->input('SellPrice');
+        $item->CategoryId = $request->input('Category');
+        $item->Qty = $request->input('Qty');
+
+        DB::beginTransaction();
+        $savedFiles = [];
+        try {
+        if($item->save()){
+            if($request->hasfile('Images'))
+            {
+                foreach($request->Images as $image)
+                {
+                    $filenameWithExt = $image->getClientOriginalName();
+                    $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                    $extension = $image->getClientOriginalExtension();
+                    $name = rand(10000,9999999).'_'.date('YmdHis').'_'.rand(10000,9999999).'.'.$image->extension();
+                    if(!Storage::disk('public')->exists('/ItemImages/'.$filenameWithExt)){
+                        $image->storeAs('public/ItemImages', $name);
+                        ItemImage::addImage($item->id, $name);
+                        array_push($savedFiles, $name);
+                    }
+                }
+            }
+            DB::commit();
+            return response()->json([
+                "id" => $item->id,
+                "Name"=> $item->Name,
+                "Price"=> $item->Price,
+                "SellPrice"=>$item->SellPrice,
+                "Qty"=> $item->Qty,
+                "category"=>$item->Category,
+                "images"=>$item->images
+
+            ], 200);
+        }
+
+        }catch (Exception $e) {
+            DB::rollBack();
+            forEach($savedFiles as $savedFile)
+            Storage::delete('public/ItemImages', $savedFile);
+            return $e;
+        } 
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -127,5 +192,31 @@ class ItemsController extends Controller
         if($item->delete()) {
             return $item;
         }  
+    }
+
+    public function itemImageDestroy(Request $request)
+    {
+        $this->validate($request, [
+            'Image' => 'required',
+        ]);
+        $image = ItemImage::where('image', $request->Image)->take(1)->get();
+        try{
+            if($image[0]->delete()) {
+                Storage::disk('public')->delete('/ItemImages/'.$image[0]->image);
+                return [
+                    "status"=>"success",
+                    "message"=>"image has been deleted."
+                ];
+            }
+        }catch(Exception $e){
+            return [
+                "status"=>"failed",
+            ];
+        }
+
+    }
+
+    public function search(Request $request){
+         return Item::where('Name', 'like', '%'. $request->input('search').'%')->with('category:id,Name','images:id,item_id,image')->orderBy('id', 'desc')->paginate(10);
     }
 }
