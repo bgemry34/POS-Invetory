@@ -1,8 +1,7 @@
 import React from 'react'
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
 
-import Login from './Components/Login/Login'
-import Home from './Components/Home/Home'
+import Home from './Components/Shopping/Home/Home'
 import Inventory from './Components/Inventory/Sidebar/Sidebar'
 
 
@@ -12,8 +11,7 @@ const Main = () => {
     <div className="App">
     <Switch>
       <Route path="/" exact component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/Inventory" component={Inventory} />
+      <Route path="/Admin/Inventory" component={Inventory} />
     </Switch>
     </div>
   </Router>

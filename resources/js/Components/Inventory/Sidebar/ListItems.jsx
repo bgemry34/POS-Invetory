@@ -23,7 +23,7 @@ export const MainListItems = ({setTitle}) => (
   <div>
       <ListItem button
       component={NavLink}
-      to="/Inventory/"
+      to="/Admin/Inventory/"
       exact
       activeStyle={{
         backgroundColor:'#ecf0f1'
@@ -37,7 +37,7 @@ export const MainListItems = ({setTitle}) => (
 
     <ListItem button
     component={NavLink}
-    to="/Inventory/Items"
+    to="/Admin/Inventory/Items"
     activeStyle={{
       backgroundColor:'#ecf0f1'
     }}
@@ -50,7 +50,7 @@ export const MainListItems = ({setTitle}) => (
 
     <ListItem button
     component={NavLink}
-    to="/Inventory/Suppliers"
+    to="/Admin/Inventory/Suppliers"
     activeStyle={{
       backgroundColor:'#ecf0f1'
     }}>
@@ -62,7 +62,7 @@ export const MainListItems = ({setTitle}) => (
 
     <ListItem button
     component={NavLink}
-    to="/Inventory/Stocks"
+    to="/Admin/Inventory/Stocks"
     activeStyle={{
       backgroundColor:'#ecf0f1'
     }}>
@@ -70,20 +70,6 @@ export const MainListItems = ({setTitle}) => (
         <i className="fab fa-dropbox fa-2x"></i>
       </ListItemIcon>
       <ListItemText primary="Stocks" />
-    </ListItem>
-
-    <ListItem button>
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Stocks" />
-    </ListItem>
-
-    <ListItem button>
-      <ListItemIcon>
-        <LayersIcon />
-      </ListItemIcon>
-      <ListItemText primary="Integrations" />
     </ListItem>
   </div>
 );

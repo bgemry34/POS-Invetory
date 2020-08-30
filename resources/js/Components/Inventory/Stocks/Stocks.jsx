@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import AddIcon from '@material-ui/icons/Add';
-import { withRouter} from 'react-router-dom';
+import { withRouter, useHistory, Link} from 'react-router-dom';
 import {debounce} from 'lodash';
  
 import {Grid,
@@ -26,7 +26,6 @@ import {
 Pagination,
 PaginationItem
 } from '@material-ui/lab'
-import { Link } from 'react-router-dom';
 import styles from './Stocks.module.css';
 import {fetchItems, addStock} from '../../../Api/items';
 import {fetchSupplier} from '../../../Api/suppliers';
@@ -63,25 +62,25 @@ const Stocks = ({setTitle, location:{search}}) => {
     useEffect(()=>{
       setTitle('Stocks');
       let isCancelled = false;
+      console.log(search)
         const fetchApi = async () =>{
-              const items = await fetchItems(search);
-              
-              if(!isCancelled){
-                setItems(items.data);
-                setPage(
-                {
-                  currentPage:items.current_page,
-                  lastPage:items.last_page
-                }
-              );
+            const items = await fetchItems(search);
+            if(!isCancelled){
+              setItems(items.data);
+              setPage(
+              {
+                currentPage:items.current_page,
+                lastPage:items.last_page
               }
+              );
+            }
         }
 
         fetchApi();
         return () => {
           isCancelled = true;
         };
-    },[page.currentPage]);
+    },[page.currentPage, searchItem]);
 
     useEffect(()=>{
       let isCancelled = false;
@@ -135,10 +134,22 @@ const Stocks = ({setTitle, location:{search}}) => {
         }
     }
 
+    const history = useHistory()
+
     const handleChange = debounce((text) =>{
+      const params = new URLSearchParams(search);
+      params.has('search') ? params.set('search', text) : params.append('search', text);
+      params.has('page') && params.set('page', 1);
+      history.push(`${location.pathname}?${params}`);
       setSearchItem(text)
-      console.log(searchItem)
-    }, 1000)
+      setItems([])
+    }, 1500)
+
+    const parameterChange = (search, param, value) =>{
+      const url = new URLSearchParams(search);
+      url.set(param, value);
+      return url.toString();
+    }
 
     const AddStockModal =  ( 
         <Dialog
@@ -181,7 +192,7 @@ const Stocks = ({setTitle, location:{search}}) => {
                     id="standard-select-native"
                     required
                     select
-                    label="Supplier"
+                  label="Supplier"
                     value={form.Supplier}
                     error={error.Supplier && true}
                     onChange={(e)=>setForm({...form, Supplier:e.target.value})}
@@ -227,6 +238,33 @@ const Stocks = ({setTitle, location:{search}}) => {
             </div>
           </DialogContent>
       </Dialog>
+    )
+
+    const pagination = (
+      <Grid
+      container
+      spacing={0}
+      direction="column"
+      alignItems="center"
+      justify="center"
+      className="mt-5 mb-2"
+      >
+      <Grid item xs={6}>
+          {items.length > 0 && (<Pagination
+          page={page.currentPage}
+          onChange={(e,v)=>{setPage({...page, currentPage:v}); setItems([])}}
+          count={page.lastPage}
+          renderItem={(item) => (
+            <PaginationItem
+              component={Link}
+              to={'/Admin/Inventory/Stocks' + (item.page === 1 ? '' : (`?` + parameterChange(search, 'page', item.page)))}
+              size='large' 
+              {...item}
+            />
+          )}
+      />)}
+      </Grid>   
+    </Grid>
     )
 
     return (
@@ -289,35 +327,7 @@ const Stocks = ({setTitle, location:{search}}) => {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                
-
-
-              {items.length > 0 && (
-                <Grid
-                container
-                spacing={0}
-                direction="column"
-                alignItems="center"
-                justify="center"
-                className="mt-5 mb-2"
-                >
-                <Grid item xs={6}>
-                    {items.length > 0 && (<Pagination
-                    page={page.currentPage}
-                    onChange={(e,v)=>{setPage({...page, currentPage:v}); setItems([])}}
-                    count={page.lastPage}
-                    renderItem={(item) => (
-                      <PaginationItem
-                        component={Link}
-                        to={`/Inventory/Stocks${item.page === 1 ? '' : `?page=${item.page}`}`}
-                        size='large'
-                        {...item}
-                      />
-                    )}
-                />)}
-                </Grid>   
-              </Grid>
-              )} 
+                {items.length > 0 && pagination} 
             </div>
             {AddStockModal}
         </div>

@@ -41,7 +41,6 @@ Route::group([
     'prefix' => 'items'
 ], function ($router) {
     Route::GET('/', 'Api\Inventory\ItemsController@index');
-    Route::GET('/searchItem','Api\Inventory\ItemsController@search');
     Route::POST('create', 'Api\Inventory\ItemsController@store');
     Route::PUT('update', 'Api\Inventory\ItemsController@update');
     Route::DELETE('delete', 'Api\Inventory\ItemsController@destroy');

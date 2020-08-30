@@ -84,16 +84,16 @@ const Sidebar = () => {
       </Drawer>
       <main className={classes.content}>
           <Switch>
-            <Route path="/Inventory/" exact >
+            <Route path="/Admin/Inventory/" exact >
               <Dashboard setTitle={setTitle} />
             </Route>
-            <Route path="/Inventory/Items" >
+            <Route path="/Admin/Inventory/Items" >
               <Items setTitle={setTitle} />
             </Route>
-            <Route path="/Inventory/Suppliers" >
+            <Route path="/Admin/Inventory/Suppliers" >
               <Suppliers setTitle={setTitle} />
             </Route>
-            <Route path="/Inventory/Stocks" >
+            <Route path="/Admin/Inventory/Stocks" >
               <Stocks setTitle={setTitle} />
             </Route>
           </Switch>

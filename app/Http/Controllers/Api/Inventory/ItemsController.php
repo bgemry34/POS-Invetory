@@ -17,10 +17,12 @@ class ItemsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         // return Item::with('category:id,name','images:id,image')->orderBy('id', 'desc')->get();
-        return Item::with('category:id,Name','images:id,item_id,image')->orderBy('id', 'desc')->paginate(10);
+        return Item::where('Name', 'like', '%'.  $request->input('search')  .'%')->
+        with('category:id,Name','images:id,item_id,image')->orderBy('id', 'desc')->paginate(10)
+        ->appends(['search'=> $request->input('search')]);
     }
 
     /**

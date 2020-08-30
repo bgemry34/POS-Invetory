@@ -26,8 +26,9 @@ InputAdornment,
 Collapse,
 Typography
 } from '@material-ui/core';
-import {Alert} from '@material-ui/lab'
-import SearchIcon from '@material-ui/icons/Search';
+import {Alert,
+  Pagination,
+  PaginationItem} from '@material-ui/lab'
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -44,8 +45,10 @@ import {fetchItems,
   deleteImage} from '../../../Api/items';
 import {fetchSupplier} from './../../../Api/suppliers';
 import {DropzoneArea} from 'material-ui-dropzone';
+import { withRouter, useHistory, Link} from 'react-router-dom';
+import {debounce} from 'lodash'
 
-function Items({setTitle}) {
+const Items = ({setTitle, location:{search}}) => {
     const classes = useStyles();
 
     // STATES
@@ -71,7 +74,7 @@ function Items({setTitle}) {
       addCategory:false
     });
 
-    const [search, setSearch] = useState('');
+    const [searchItem, setSearchItem] = useState('');
 
     const [form, setForm] = useState ({
       Name:'',
@@ -92,6 +95,11 @@ function Items({setTitle}) {
       Supplier:false
     });
 
+    const [page, setPage] = useState({
+      currentPage:1,
+      lastPage:1
+    });
+
     //use Ref
     const topRef = React.useRef();
 
@@ -100,11 +108,10 @@ function Items({setTitle}) {
       let isCancelled = false;
       setTitle('Items');
       const fetchApi = async () => {
-          let resitems = await fetchItems();
           let rescategories = await fetchCategories();
           let ressuppliers = await fetchSupplier();
           if(!isCancelled)
-          {setItems(resitems.data);
+          {
           setCategories(rescategories);
           setSuppliers(ressuppliers);}
       }
@@ -116,11 +123,47 @@ function Items({setTitle}) {
 
       return ()=>isCancelled=true;
     },[]);
+
+    useEffect(()=>{
+      let isCancelled = false;
+      const fetchApi = async () =>{
+        let items = await fetchItems(search);
+        if(!isCancelled){
+          setItems(items.data);
+          setPage(
+          {
+            currentPage:items.current_page,
+            lastPage:items.last_page
+          }
+          );
+        }
+      }
+      fetchApi();
+      return ()=>isCancelled = true
+    }, [searchItem, page.currentPage])
+
     
 
     //functions
     const handleChange =  (e) =>{
       setForm({...form, [e.target.name]:e.target.value});
+    }
+
+    const history = useHistory()
+
+    const searchChange = debounce((text) =>{
+      const params = new URLSearchParams(search);
+      params.has('search') ? params.set('search', text) : params.append('search', text);
+      params.has('page') && params.set('page', 1);
+      history.push(`${location.pathname}?${params}`);
+      setSearchItem(text)
+      setItems([])
+    }, 1500)
+
+    const parameterChange = (search, param, value) =>{
+      const url = new URLSearchParams(search);
+      url.set(param, value);
+      return url.toString();
     }
     
     const createItem = async (e) => {
@@ -215,6 +258,34 @@ function Items({setTitle}) {
     const destroyImage = async (image)=>{
       return isEdit && await deleteImage(image.name);
     }
+
+    // Pagination 
+    const pagination = (
+      <Grid
+      container
+      spacing={0}
+      direction="column"
+      alignItems="center"
+      justify="center"
+      className="mt-5 mb-2"
+      >
+      <Grid item xs={6}>
+          {items.length > 0 && (<Pagination
+          page={page.currentPage}
+          onChange={(e,v)=>{setPage({...page, currentPage:v}); setItems([])}}
+          count={page.lastPage}
+          renderItem={(item) => (
+            <PaginationItem
+              component={Link}
+              to={'/Admin/Inventory/Items' + (item.page === 1 ? '' : (`?` + parameterChange(search, 'page', item.page)))}
+              size='large' 
+              {...item}
+            />
+          )}
+      />)}
+      </Grid>   
+    </Grid>
+    )
 
     //Dialogs
     const addDialog = (
@@ -495,7 +566,7 @@ function Items({setTitle}) {
                                 <Grid item xs={8}>
                                     <TextField id="search" name="search" 
                                     label="Search Item" 
-                                    onChange={(e)=>setSearch(e.target.value)}
+                                    onChange={(e)=>searchChange(e.target.value)}
                                     fullWidth
                                     />
                                 </Grid>
@@ -561,11 +632,11 @@ function Items({setTitle}) {
                           <TableCell align="right">{item.SellPrice}</TableCell>
                           <TableCell align="right">{item.Qty}</TableCell>
                           <TableCell align="center">
-                            <Tooltip title="Delete Item" aria-label="Delete Item">
+                            {/* <Tooltip title="Delete Item" aria-label="Delete Item">
                               <IconButton className="text-primary" aria-label="delete">
                                 <VisibilityIcon />
                               </IconButton>
-                            </Tooltip>
+                            </Tooltip> */}
                             <Tooltip title="View Item" aria-label="Delete Item">
                               <IconButton onClick={e=>deleteItem(item.id)} className="text-danger" aria-label="delete">
                                 <DeleteIcon />
@@ -596,6 +667,7 @@ function Items({setTitle}) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                {items.length>0 && pagination}
             </div>
           {/* dailogs */}
           {categoryDialog}
@@ -610,4 +682,4 @@ function Items({setTitle}) {
     }
 }
 
-export default Items
+export default withRouter(Items)

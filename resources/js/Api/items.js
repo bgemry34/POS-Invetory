@@ -2,9 +2,9 @@ import axios from 'axios'
 
 const url = 'http://posinventory.test/api';
 
-export const fetchItems = async (page = '') =>{
+export const fetchItems = async (param = '') => {
     try{
-        const {data} = await axios.get(`${url}/items${page}`);
+        const {data} = await axios.get(`${url}/items${param}`);
         return data;
     }catch(error){
         return error.response
@@ -95,13 +95,4 @@ export const addStock = (Item, Supplier, Qty) =>{
     .then(res=>res)
     .catch(error=>error.response);
     return data;
-}
-
-export const searchItem = async (search, page='') => {
-    try{
-        const {data} = await axios.get(`${url}/items${page}`);
-        return data;
-    }catch(error){
-        return error.response
-    }
 }
