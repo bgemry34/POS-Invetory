@@ -12,6 +12,7 @@ import LayersIcon from '@material-ui/icons/Layers';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import StorageIcon from '@material-ui/icons/Storage';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import {NavLink} from 'react-router-dom'
 
 // const addNavLink = (Name, Icon, Link){
@@ -67,7 +68,7 @@ export const MainListItems = ({setTitle}) => (
       backgroundColor:'#ecf0f1'
     }}>
       <ListItemIcon>
-        <i className="fab fa-dropbox fa-2x"></i>
+        <PlaylistAddIcon />
       </ListItemIcon>
       <ListItemText primary="Stocks" />
     </ListItem>
