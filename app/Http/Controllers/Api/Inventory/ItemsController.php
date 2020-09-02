@@ -48,8 +48,9 @@ class ItemsController extends Controller
 
         $this->validate($request, [
             'Images' => 'nullable|max:5',
-            'Images.*' => 'mimes:jpeg, png, bmp, svg|max:1999',
+            'Images.*' => 'mimes:png,bmp,jpeg|max:1999|',
             'Name' => 'required|unique:items',
+            'Description' => 'required',
             'Price' => 'required|numeric|min:1',
             'SellPrice' => 'required|numeric|min:1',
             'Category' => 'required|numeric',
@@ -61,6 +62,7 @@ class ItemsController extends Controller
 
         $item->id = $request->input('ItemId') ;
         $item->Name =  $request->input('Name');
+        $item->Description = $request->input('Description');
         $item->Price = $request->input('Price');
         $item->SellPrice = $request->input('SellPrice');
         $item->CategoryId = $request->input('Category');
@@ -124,6 +126,7 @@ class ItemsController extends Controller
         $this->validate($request, [
             'Images' => 'nullable|max:5',
             'Images.*' => 'mimes:jpeg, png, bmp, svg|max:1999',
+            'Description' => 'required',
             'Name' => 'required|unique:items,Name,'.$request->ItemId,
             'Price' => 'required|numeric|min:1',
             'SellPrice' => 'required|numeric|min:1',
@@ -135,6 +138,7 @@ class ItemsController extends Controller
         $item->id = $request->input('ItemId') ;
         $item->Name =  $request->input('Name');
         $item->Price = $request->input('Price');
+        $item->Description = $request->input('Description');
         $item->SellPrice = $request->input('SellPrice');
         $item->CategoryId = $request->input('Category');
         $item->Qty = $request->input('Qty');
@@ -163,6 +167,7 @@ class ItemsController extends Controller
                 "id" => $item->id,
                 "Name"=> $item->Name,
                 "Price"=> $item->Price,
+                "Description"=> $item->Description,
                 "SellPrice"=>$item->SellPrice,
                 "Qty"=> $item->Qty,
                 "category"=>$item->Category,
@@ -201,7 +206,9 @@ class ItemsController extends Controller
         $this->validate($request, [
             'Image' => 'required',
         ]);
+
         $image = ItemImage::where('image', $request->Image)->take(1)->get();
+
         try{
             if($image[0]->delete()) {
                 Storage::disk('public')->delete('/ItemImages/'.$image[0]->image);

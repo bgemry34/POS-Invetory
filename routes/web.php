@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/{path?}', 'index');
 Route::view('/{path?}/{path2?}/', 'index');
+Route::view('/{path?}/{path2?}/{path3}', 'index');
 
 Auth::routes();
 

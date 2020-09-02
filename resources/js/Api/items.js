@@ -20,13 +20,14 @@ export const fetchCategories = async () =>{
     }
 }
 
-export const addItem =  (Name, Price, SellPrice, Category, Qty, Supplier, Images=[]) => {
+export const addItem =  (Name, Price, SellPrice, Category, Qty, Supplier, Images=[], Description) => {
     const fd = new FormData();
     if(Images.length > 0)
     Images.forEach(Image=>{
         fd.append('Images[]', Image, Image.name)
     })
     fd.append('Name',Name);
+    fd.append('Description', Description)
     fd.append('Price', Price);
     fd.append('SellPrice', SellPrice);
     fd.append('Category', Category);
@@ -59,7 +60,7 @@ export const removeItem = (ItemId)=>{
     return data;
 }
 
-export const  updateItem = (ItemId, Name, Price, SellPrice, Category, Qty, Images)=>{
+export const  updateItem = (ItemId, Name, Price, SellPrice, Category, Qty, Images, Description)=>{
     const fd = new FormData();
     if(Images.length > 0)
     Images.forEach(Image=>{
@@ -68,6 +69,7 @@ export const  updateItem = (ItemId, Name, Price, SellPrice, Category, Qty, Image
 
     fd.append('ItemId',ItemId);
     fd.append('Name',Name);
+    fd.append('Description', Description)
     fd.append('Price', Price);
     fd.append('SellPrice', SellPrice);
     fd.append('Category', Category);

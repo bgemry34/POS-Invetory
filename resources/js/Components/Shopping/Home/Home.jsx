@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { Container, 
     Typography, 
     TextField, 
@@ -8,11 +8,36 @@ import { Container,
     CardActionArea, 
     CardContent, 
     CardActions, 
-    Button  } from '@material-ui/core'
+    Button  
+} from '@material-ui/core'
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import {fetchItems} from './../../../Api/items'
 
 
 
 const Home = () => {
+    
+    //state
+    const [items, setItems] = useState([]);
+    
+    useEffect(()=>{
+        let isCancell = false;
+        const fetchApi = async () => {
+            const items = await fetchItems()
+            if(!isCancell)
+            setItems(items.data)
+        }
+        fetchApi();
+        return ()=>isCancell=true;
+    },[])
+    
+    const truncate = (str, no_words) => {
+        let newWord = str.split(" ");
+        let count = str.split(" ").length;
+        let output = newWord.splice(0,no_words).join(" ") + (count > no_words ? '...' : '.')
+        return output;
+    }
+
     return (
         <div>
             <Container maxWidth="xl">
@@ -29,125 +54,50 @@ const Home = () => {
 
                     <Grid item xs={12}>
                         <Grid container spacing={3} direction="row"
-                        justify="space-between"
-                        alignItems="flex-start"
+                        alignItems="stretch"
                         >
-                            <Grid item md={3} alignItems="center">
-                                <Card style={{ maxWidth: '100%' }}>
-                                    <CardActionArea>
+                        {items.length > 0 && items.map(item=>(
+                            <Grid item md={3} key={item.id}>
+                                <Card style={{ maxWidth: '100%', height: 600}}>
+                                <CardActions style={{position:'relative', top:550}} >
+                                        <Grid container>
+                                        <Grid item md={6}>
+                                        <Typography style={{float:'left', marginBottom:20, color:'#7f8c8d', textAlign:'center'}} gutterBottom variant="h5" component="h5">
+                                            {'$ '+ item.SellPrice}
+                                        </Typography>
+                                        </Grid>
+                                        <Grid item md={6}>  
+                                            <Button
+                                            variant="contained"
+                                            className={'bg-success float-right text-white'}
+                                            endIcon={<ShoppingCartIcon  className={'text-white'}/>}
+                                            fullWidth
+                                            >
+                                                Add
+                                            </Button>  
+                                        </Grid>
+                                        </Grid> 
+                                    </CardActions>
+                                    <CardActionArea style={{position:'relative', bottom:70}}>
                                         <CardMedia
-                                            style={{height: '400px',
+                                            style={{height: item.Name.split(' ').length<10 ? '400px' : '360px',
                                             backgroundSize: 'contain'}}
-                                            image="https://kbimages1-a.akamaihd.net/f98d4bdd-9aee-463a-bee3-983205a7d99a/1200/1200/False/re-zero-starting-life-in-another-world-vol-1-light-novel-2.jpg"
+                                            image={'http://posinventory.test/storage/ItemImages/'+item.images[0].image}
                                             title="Contemplative Reptile"
                                         />
                                         <CardContent>
-                                            <Typography gutterBottom variant="h5" component="h5">
-                                                Re:ZERO -Starting Life in Another World-, Vol. 1
+                                            <Typography gutterBottom variant="h6" style={{textTransform: 'capitalize'}}>
+                                                {item.Name}
                                             </Typography>
-                                            <Typography variant="body2" color="textSecondary" component="p">
-                                            Subaru Natsuki was just trying to get to the convenience store but wound up summoned to another world. He encounters the usual things--life-threatening situations, silver haired beauties, cat fairies--you know, normal stuff. All that would be bad enough, but he's also gained the most inconvenient magical ability of all--time travel,
-                                            but he's got to die to use it. How do you repay someone who saved your life when all you can do is die?
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                    <CardActions style={{display:'block'}} >
-                                        <Typography style={{float:'left'}} gutterBottom variant="h5" component="h5">
-                                            $ 9.99
-                                        </Typography>
-                                        <Button style={{float:'right'}} size="small" color="primary">
-                                            Add to Cart
-                                        </Button>
-                                    </CardActions>
-                                </Card>
-                            </Grid>
-                            <Grid item md={3}>
-                                <Card style={{ maxWidth: '100%' }}>
-                                    <CardActionArea>
-                                        <CardMedia
-                                            style={{height: '400px',
-                                            backgroundSize: 'contain'}}
-                                            image="https://kbimages1-a.akamaihd.net/f98d4bdd-9aee-463a-bee3-983205a7d99a/1200/1200/False/re-zero-starting-life-in-another-world-vol-1-light-novel-2.jpg"
-                                            title="Contemplative Reptile"
-                                        />
-                                        <CardContent>
-                                            <Typography gutterBottom variant="h5" component="h5">
-                                                Re:ZERO -Starting Life in Another World-, Vol. 1
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" component="p">
-                                            Subaru Natsuki was just trying to get to the convenience store but wound up summoned to another world. He encounters the usual things--life-threatening situations, silver haired beauties, cat fairies--you know, normal stuff. All that would be bad enough, but he's also gained the most inconvenient magical ability of all--time travel,
-                                            but he's got to die to use it. How do you repay someone who saved your life when all you can do is die?
+                                            <Typography variant="caption" color="textSecondary" component="p">
+                                            {truncate(item.Description, 10)}
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>
-                                    <CardActions style={{display:'block'}} >
-                                        <Typography style={{float:'left'}} gutterBottom variant="h5" component="h5">
-                                            $ 9.99
-                                        </Typography>
-                                        <Button style={{float:'right'}} size="small" color="primary">
-                                            Add to Cart
-                                        </Button>
-                                    </CardActions>
+                                    
                                 </Card>
                             </Grid>
-                            <Grid item md={3}>
-                                <Card style={{ maxWidth: '100%' }}>
-                                    <CardActionArea>
-                                        <CardMedia
-                                            style={{height: '400px',
-                                            backgroundSize: 'contain'}}
-                                            image="https://kbimages1-a.akamaihd.net/f98d4bdd-9aee-463a-bee3-983205a7d99a/1200/1200/False/re-zero-starting-life-in-another-world-vol-1-light-novel-2.jpg"
-                                            title="Contemplative Reptile"
-                                        />
-                                        <CardContent>
-                                            <Typography gutterBottom variant="h5" component="h5">
-                                                Re:ZERO -Starting Life in Another World-, Vol. 1
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" component="p">
-                                            Subaru Natsuki was just trying to get to the convenience store but wound up summoned to another world. He encounters the usual things--life-threatening situations, silver haired beauties, cat fairies--you know, normal stuff. All that would be bad enough, but he's also gained the most inconvenient magical ability of all--time travel,
-                                            but he's got to die to use it. How do you repay someone who saved your life when all you can do is die?
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                    <CardActions style={{display:'block'}} >
-                                        <Typography style={{float:'left'}} gutterBottom variant="h5" component="h5">
-                                            $ 9.99
-                                        </Typography>
-                                        <Button style={{float:'right'}} size="small" color="primary">
-                                            Add to Cart
-                                        </Button>
-                                    </CardActions>
-                                </Card>
-                            </Grid>
-                            <Grid item md={3}>
-                                <Card style={{ maxWidth: '100%' }}>
-                                    <CardActionArea>
-                                        <CardMedia
-                                            style={{height: '400px',
-                                            backgroundSize: 'contain'}}
-                                            image="https://kbimages1-a.akamaihd.net/f98d4bdd-9aee-463a-bee3-983205a7d99a/1200/1200/False/re-zero-starting-life-in-another-world-vol-1-light-novel-2.jpg"
-                                            title="Contemplative Reptile"
-                                        />
-                                        <CardContent>
-                                            <Typography gutterBottom variant="h5" component="h5">
-                                                Re:ZERO -Starting Life in Another World-, Vol. 1
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" component="p">
-                                            Subaru Natsuki was just trying to get to the convenience store but wound up summoned to another world. He encounters the usual things--life-threatening situations, silver haired beauties, cat fairies--you know, normal stuff. All that would be bad enough, but he's also gained the most inconvenient magical ability of all--time travel,
-                                            but he's got to die to use it. How do you repay someone who saved your life when all you can do is die?
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                    <CardActions style={{display:'block'}} >
-                                        <Typography style={{float:'left'}} gutterBottom variant="h5" component="h5">
-                                            $ 9.99
-                                        </Typography>
-                                        <Button style={{float:'right'}} size="small" color="primary">
-                                            Add to Cart
-                                        </Button>
-                                    </CardActions>
-                                </Card>
-                            </Grid>
+                            ))}
                         </Grid>
                     </Grid>
                 </Grid>

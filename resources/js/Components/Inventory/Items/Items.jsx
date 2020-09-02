@@ -78,6 +78,7 @@ const Items = ({setTitle, location:{search}}) => {
 
     const [form, setForm] = useState ({
       Name:'',
+      Description:'',
       Category:' ',
       Price:'',
       SellPrice:'',
@@ -168,21 +169,23 @@ const Items = ({setTitle, location:{search}}) => {
     
     const createItem = async (e) => {
       e.preventDefault();
-      const {id, Name, Price, SellPrice, Category, Qty, Supplier, Images} = form;  
+      const {id, Name, Price, SellPrice, Category, Qty, Supplier, Images, Description} = form;  
       const res = isEdit ? await updateItem(id, 
         Name, 
         Price, 
         SellPrice, 
         Category, 
         Qty, 
-        Images
+        Images,
+        Description
         ) : await addItem(Name, 
         Price, 
         SellPrice, 
         Category, 
         Qty, 
         Supplier,
-        Images);
+        Images,
+        Description);
         const {status, data:{errors}} = res
       if(status==422){
         console.log(form)
@@ -193,7 +196,8 @@ const Items = ({setTitle, location:{search}}) => {
           Price:false,
           SellPrice:false,
           Qty:false,
-          Supplier:false
+          Supplier:false,
+          Description:false
         }
         for(let x in errors){
           errorsContainer[x] = errors[x][0]
@@ -221,7 +225,17 @@ const Items = ({setTitle, location:{search}}) => {
         console.log(res.data)
         isEdit ? setAlert(showAlert('Item Successfully Edited !', 'success'))
         :setAlert(showAlert('Item Successfully Added !', 'success'));
-        setAlertVisible(true);  
+        setAlertVisible(true);
+        setForm ({
+              Name:'',
+              Category:' ',
+              Description:'',
+              Price:'',
+              SellPrice:'',
+              Qty:'1',
+              Supplier:' ',
+              Images:[]
+            });  
         setTimeout(()=>setAlertVisible(false), 10000);
       }
     }
@@ -304,6 +318,7 @@ const Items = ({setTitle, location:{search}}) => {
             setForm ({
               Name:'',
               Category:' ',
+              Description:'',
               Price:'',
               SellPrice:'',
               Qty:'1',
@@ -333,10 +348,23 @@ const Items = ({setTitle, location:{search}}) => {
                   onChange={handleChange}
                   fullWidth
                   />
+                  <TextField required
+                  name="Description"
+                  multiline
+                  rows={4}
+                  id="standard-required" 
+                  defaultValue={isEdit ? form.Description : ''}
+                  label="Description"
+                  error={error.Description && true}
+                  helperText={error.Description}
+                  onChange={handleChange}
+                  fullWidth
+                  />
                 </FormControl>
                 <FormControl margin="normal" fullWidth>
                   <TextField
                   select
+                  margin="normal"
                   label="Category"
                   name="Category"
                   value={form.Category}
@@ -627,10 +655,10 @@ const Items = ({setTitle, location:{search}}) => {
                           <TableCell component="th" scope="row">
                             {item.Name}
                           </TableCell>
-                          <TableCell align="right">{item.category !== null ? item.category.Name : '---'}</TableCell>
-                          <TableCell align="right">{item.Price}</TableCell>
-                          <TableCell align="right">{item.SellPrice}</TableCell>
-                          <TableCell align="right">{item.Qty}</TableCell>
+                          <TableCell align="center">{item.category !== null ? item.category.Name : '---'}</TableCell>
+                          <TableCell align="center">{item.Price}</TableCell>
+                          <TableCell align="center">{item.SellPrice}</TableCell>
+                          <TableCell align="center">{item.Qty}</TableCell>
                           <TableCell align="center">
                             {/* <Tooltip title="Delete Item" aria-label="Delete Item">
                               <IconButton className="text-primary" aria-label="delete">
@@ -650,6 +678,7 @@ const Items = ({setTitle, location:{search}}) => {
                                 setForm({
                                   id:item.id,
                                   Name:item.Name,
+                                  Description:item.Description,
                                   Category:item.category==null ? ' ' : item.category.id,
                                   Price:item.Price,
                                   SellPrice:item.SellPrice,

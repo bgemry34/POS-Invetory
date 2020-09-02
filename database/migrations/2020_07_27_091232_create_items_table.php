@@ -17,6 +17,7 @@ class CreateItemsTable extends Migration
             $table->id();
             $table->string('Name');
             $table->string('CategoryId')->nullable();
+            $table->text('Description')->nullable();
             $table->decimal('Price', 10, 2);
             $table->decimal('SellPrice', 10, 2);
             $table->integer('Qty');
