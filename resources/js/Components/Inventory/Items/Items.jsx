@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {useStyles} from './Items.style';
 import {CssBaseline,
 Grid,
@@ -146,9 +146,9 @@ const Items = ({setTitle, location:{search}}) => {
     
 
     //functions
-    const handleChange =  (e) =>{
+    const handleChange =  useCallback((e) =>{
       setForm({...form, [e.target.name]:e.target.value});
-    }
+    },[setForm, form])
 
     const history = useHistory()
 
@@ -327,7 +327,7 @@ const Items = ({setTitle, location:{search}}) => {
             });
             setIsEdit(false);
           }}
-          scroll="paper"
+          scroll="body"
           aria-labelledby="scroll-dialog-title"
           aria-describedby="scroll-dialog-description"
           fullWidth
@@ -524,7 +524,7 @@ const Items = ({setTitle, location:{search}}) => {
                         label="Category Name:"
                         error={error.Category && true}  
                         helperText={error.Category ? error.Category :''}
-                        onChange={e=>setForm({...form, Category:e.target.value})}
+                        onChange={handleChange}
                         required
                         fullWidth
                       />

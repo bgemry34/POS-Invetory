@@ -49,7 +49,7 @@ class UsersController extends Controller
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Invalid username or password.'], 401);
         }
 
         return $this->respondWithToken($token);

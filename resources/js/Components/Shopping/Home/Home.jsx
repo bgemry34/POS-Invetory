@@ -8,7 +8,7 @@ import { Container,
     CardActionArea, 
     CardContent, 
     CardActions, 
-    Button  
+    Button,
 } from '@material-ui/core'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import {fetchItems} from './../../../Api/items'
@@ -57,16 +57,16 @@ const Home = () => {
                         alignItems="stretch"
                         >
                         {items.length > 0 && items.map(item=>(
-                            <Grid item md={3} key={item.id}>
+                            <Grid item lg={3} md={4} xs={12}  key={item.id}>
                                 <Card style={{ maxWidth: '100%', height: 600}}>
-                                <CardActions style={{position:'relative', top:550}} >
+                                    <CardActions style={{position:'relative', top:550}} >
                                         <Grid container>
-                                        <Grid item md={6}>
+                                        <Grid item xs={6} md={6}>
                                         <Typography style={{float:'left', marginBottom:20, color:'#7f8c8d', textAlign:'center'}} gutterBottom variant="h5" component="h5">
                                             {'$ '+ item.SellPrice}
                                         </Typography>
                                         </Grid>
-                                        <Grid item md={6}>  
+                                        <Grid item xs={6} md={6}>  
                                             <Button
                                             variant="contained"
                                             className={'bg-success float-right text-white'}
