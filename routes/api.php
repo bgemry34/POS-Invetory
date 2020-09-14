@@ -37,7 +37,7 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => ['api', 'throttle:1500,1'],
+    'middleware' => ['api', 'throttle:5000,1'],
     'prefix' => 'items'
 ], function ($router) {
     Route::GET('/', 'Api\Inventory\ItemsController@index');

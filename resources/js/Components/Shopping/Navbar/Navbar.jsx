@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect, useRef} from 'react';
+import React, {useState, useCallback, useContext, useEffect, useRef} from 'react';
 import { makeStyles, useTheme  } from '@material-ui/core/styles';
 import { UserContext } from '../Context/UserContext';
 import {
@@ -30,6 +30,7 @@ import {checkUser} from './../../../Api/users'
 import {NavLink} from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import {logoutUser} from './../../../Api/users'
 
 //style
 const useStyles = makeStyles((theme) => ({
@@ -145,6 +146,15 @@ export default function Navbar() {
     setValue(index);
   };
 
+  const logout = async () =>{
+    console.log('clicked logout')
+    const res = await logoutUser(user.access_token)
+    if(res.status == 200){
+    sessionStorage.clear();
+    window.location.reload(false);}
+  }
+
+
   const LoginModal = (
     <Dialog fullWidth open={openLogin} onClose={()=>setOpenLogin(false)} aria-labelledby="form-dialog-title">
         <AppBar position="static" color="default">
@@ -188,7 +198,7 @@ export default function Navbar() {
           onClick={handleToggle}
           endIcon={<ArrowDropDownIcon />}
         >
-          {user===null ? 'User' : user.name}
+          {JSON.parse(sessionStorage.getItem('user'))===null ? 'User' : (JSON.parse(sessionStorage.getItem('user')).name==null ? 'User' : JSON.parse(sessionStorage.getItem('user')).name)}
         </Button>
         <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition placement="bottom-end" disablePortal>
           {({ TransitionProps }) => (
@@ -199,7 +209,7 @@ export default function Navbar() {
                 <ClickAwayListener onClickAway={handleClose}>
                   <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={handleListKeyDown}>
                     <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                    <MenuItem onClick={logout}>Logout</MenuItem>
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
@@ -214,7 +224,7 @@ export default function Navbar() {
       <nav className={classes.nav}>
         <Button  className={classes.btn} color="inherit" startIcon={<ShoppingCartIcon />} >My Cart</Button>
         {
-        user === null ? (<Button  className={classes.btn} color="inherit" onClick={()=>setOpenLogin(true)}>Login</Button>)
+        JSON.parse(sessionStorage.getItem('user')) === null ? (<Button  className={classes.btn} color="inherit" onClick={()=>setOpenLogin(true)}>Login</Button>)
         : profile
         }
       </nav>

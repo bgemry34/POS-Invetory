@@ -32,3 +32,17 @@ export const checkUser = (token) => {
     .catch(error=>error.response);
     return res;
 }
+
+export const registerUser = (user) => {
+    const res = axios.post(`${url}/users/register`, user)
+    .then(res=>res)
+    .catch(error=>error.response);
+    return res;
+}
+
+export const logoutUser = (token) => {
+    const res = axios.post(`${url}/users/logout?token=${token}`)
+    .then(res=>res)
+    .catch(error=>error.response)
+    return res;
+}

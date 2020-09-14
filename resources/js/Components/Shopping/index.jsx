@@ -4,6 +4,7 @@ import Navbar from './Navbar/Navbar'
 import Home from './Home/Home'
 import { Provider } from 'react-redux'
 import { UserContext } from "./Context/UserContext";
+import Cart from './Cart/Cart'
 
 const index = () => {
 
@@ -17,6 +18,7 @@ const index = () => {
         <Navbar />
           <Switch>
             <Route path="/" exact component={Home} />
+            <Route path="/mycart" component={Cart} />
           </Switch>
         </div>
         </Router>
