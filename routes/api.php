@@ -90,3 +90,11 @@ Route::group([
     Route::GET('/', 'Api\Inventory\StocksController@index');
     Route::POST('create', 'Api\Inventory\StocksController@store');
 });
+
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'cart'
+], function ($router) {
+    Route::DELETE('/delete', 'Api\Inventory\CartController@destroy'); 
+    Route::POST('/create', 'Api\Inventory\CartController@store');
+});

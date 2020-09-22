@@ -86,18 +86,15 @@ function a11yProps(index) {
 //main function
 export default function Navbar() {
   const classes = useStyles();
-
-  const [openLogin, setOpenLogin] = useState(false);
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
-  const [userNav, setUserNav] = useState(null)
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, openLogin, setOpenLogin} = useContext(UserContext);
   
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
@@ -222,7 +219,7 @@ export default function Navbar() {
     //NAVIGATION
     const initNav = (
       <nav className={classes.nav}>
-        <Button  className={classes.btn} color="inherit" startIcon={<ShoppingCartIcon />} >My Cart</Button>
+        <Button  className={classes.btn} color="inherit"><NavLink to="/cart">My Cart</NavLink></Button>
         {
         JSON.parse(sessionStorage.getItem('user')) === null ? (<Button  className={classes.btn} color="inherit" onClick={()=>setOpenLogin(true)}>Login</Button>)
         : profile

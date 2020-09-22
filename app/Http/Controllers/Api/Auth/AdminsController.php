@@ -8,10 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Admin as Admins;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
-use Illuminate\Support\Facades\Lang;
 
 class AdminsController extends Controller
 {

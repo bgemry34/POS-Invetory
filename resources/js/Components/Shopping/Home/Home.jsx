@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import { Container, 
     Typography, 
     TextField, 
@@ -12,6 +12,9 @@ import { Container,
 } from '@material-ui/core'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import {fetchItems} from './../../../Api/items'
+import {addCart} from './../../../Api/cart'
+import { checkUser } from '../../../Api/users';
+import { UserContext } from '../Context/UserContext';
 
 
 
@@ -19,7 +22,7 @@ const Home = () => {
     
     //state
     const [items, setItems] = useState([]);
-    
+    const {setOpenLogin} = useContext(UserContext);
     useEffect(()=>{
         let isCancell = false;
         const fetchApi = async () => {
@@ -36,6 +39,20 @@ const Home = () => {
         let count = str.split(" ").length;
         let output = newWord.splice(0,no_words).join(" ") + (count > no_words ? '...' : '.')
         return output;
+    }
+
+    const _addCart = async (item_id)  =>{
+        const _user = JSON.parse(sessionStorage.getItem('user'));
+        if(_user==null){
+            setOpenLogin(true)
+            return 0;
+        }
+        const __user__ = await checkUser(_user.access_token);
+        if(__user__.status !== 200)
+        setOpenLogin(true)
+        else if (__user__.status == 200){
+            const res = await addCart(_user.access_token, item_id);
+        }
     }
 
     return (
@@ -71,6 +88,7 @@ const Home = () => {
                                             variant="contained"
                                             className={'bg-success float-right text-white'}
                                             endIcon={<ShoppingCartIcon  className={'text-white'}/>}
+                                            onClick={e=>_addCart(item.id)}
                                             fullWidth
                                             >
                                                 Add
@@ -94,7 +112,6 @@ const Home = () => {
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>
-                                    
                                 </Card>
                             </Grid>
                             ))}

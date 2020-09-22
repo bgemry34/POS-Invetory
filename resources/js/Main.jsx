@@ -11,6 +11,7 @@ const Main = () => {
     <div className="App">
       <Switch>
         <Route path="/" exact component={Shopping} />
+        <Route path="/cart" component={Shopping} />
         <Route path="/Admin/Inventory" component={Inventory} />
       </Switch>
     </div>

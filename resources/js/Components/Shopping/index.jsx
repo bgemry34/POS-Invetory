@@ -9,7 +9,13 @@ import Cart from './Cart/Cart'
 const index = () => {
 
    const [user, setUser] = useState(null);
-   const value = useMemo(() => ({ user, setUser }), [user, setUser]);
+   const [openLogin, setOpenLogin] = useState(false)
+   const value = useMemo(() => ({ 
+     user, 
+     setUser,
+     openLogin, 
+     setOpenLogin 
+  }), [user, setUser, openLogin, setOpenLogin]);
 
     return (
       <UserContext.Provider value={value} >
@@ -18,7 +24,7 @@ const index = () => {
         <Navbar />
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/mycart" component={Cart} />
+            <Route path="/cart" component={Cart} />
           </Switch>
         </div>
         </Router>
