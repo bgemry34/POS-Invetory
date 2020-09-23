@@ -10,7 +10,7 @@ export const addCart = (token, item_id) => {
     const res = axios.post(`${url}/cart/create`, {
         'qty': 1,
         item_id
-    }, headers)
+    }, {headers})
     .then(res=>res)
     .catch(error=>error.response);
     return res;
