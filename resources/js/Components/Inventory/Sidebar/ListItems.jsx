@@ -22,19 +22,19 @@ import {NavLink} from 'react-router-dom'
 
 export const MainListItems = ({setTitle}) => (
   <div>
-      <ListItem button
-      component={NavLink}
-      to="/Admin/Inventory/"
-      exact
-      activeStyle={{
-        backgroundColor:'#ecf0f1'
-      }}
-      >
-        <ListItemIcon>
-          <DashboardIcon />
-        </ListItemIcon>
-        <ListItemText primary="Dashboard" />
-      </ListItem>
+    <ListItem button
+    component={NavLink}
+    to="/Admin/Inventory/"
+    exact
+    activeStyle={{
+      backgroundColor:'#ecf0f1'
+    }}
+    >
+      <ListItemIcon>
+        <DashboardIcon />
+      </ListItemIcon>
+      <ListItemText primary="Dashboard" />
+    </ListItem>
 
     <ListItem button
     component={NavLink}
